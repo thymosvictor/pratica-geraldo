@@ -1,8 +1,0 @@
-{
-  "musicas": [
-    { "id": 1, "nome": "Shape of You", "imagem": "https://i.imgur.com/1.jpg" },
-    { "id": 2, "nome": "Blinding Lights", "imagem": "https://i.imgur.com/2.jpg" },
-    { "id": 3, "nome": "Levitating", "imagem": "https://i.imgur.com/3.jpg" },
-    { "id": 4, "nome": "Despacito", "imagem": "https://i.imgur.com/4.jpg" }
-  ]
-}
