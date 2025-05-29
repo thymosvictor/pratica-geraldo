@@ -4,7 +4,12 @@ import {
   StyleSheet, TextInput, ActivityIndicator, Alert 
 } from 'react-native';
 
-const API_URL = 'http://localhost:5000/api/musicas'; // Troque pelo seu IP local ou localhost se for web
+import imagine from './assets/thymos.jpeg';
+import heyjude from './assets/splash-icon.png'
+import padrao from './assets/favicon.png'
+
+// ⚠️ Troque localhost pelo IP da sua máquina se estiver no celular
+const API_URL = 'http://localhost:5000/api/musicas';
 
 export default function App() {
   const [tela, setTela] = useState('Home');
@@ -13,6 +18,12 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const imageMap = {
+  'thymos.jpeg': imagine,
+  'splash-icon.png': heyjude,
+  'favicon.png': padrao,
+};
 
   useEffect(() => {
     if (tela === 'Musicas') {
@@ -61,6 +72,23 @@ export default function App() {
     ]);
   };
 
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Image 
+        source={imageMap[item.image] || padrao} 
+        style={styles.image} 
+      />
+      <Text style={styles.nome}>{item.title}</Text>
+      <Text>{item.artist}</Text>
+      <TouchableOpacity 
+        style={styles.btn}
+        onPress={() => adicionarFavorito(item)}
+      >
+        <Text style={styles.btnText}>⭐ Favoritar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   const renderTela = () => {
     if (tela === 'Home') {
       return (
@@ -83,18 +111,7 @@ export default function App() {
               <FlatList
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => (
-                  <View style={styles.card}>
-                    <Image source={{ uri: item.imagem }} style={styles.image} />
-                    <Text style={styles.nome}>{item.nome}</Text>
-                    <TouchableOpacity 
-                      style={styles.btn}
-                      onPress={() => adicionarFavorito(item)}
-                    >
-                      <Text style={styles.btnText}>⭐ Favoritar</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
+                renderItem={renderItem}
               />
             )
           )}
@@ -109,18 +126,7 @@ export default function App() {
           <FlatList
             data={musicas}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <Image source={{ uri: item.imagem }} style={styles.image} />
-                <Text style={styles.nome}>{item.nome}</Text>
-                <TouchableOpacity 
-                  style={styles.btn}
-                  onPress={() => adicionarFavorito(item)}
-                >
-                  <Text style={styles.btnText}>⭐ Favoritar</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            renderItem={renderItem}
           />
         </View>
       );
@@ -136,12 +142,7 @@ export default function App() {
             <FlatList
               data={favoritos}
               keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.card}>
-                  <Image source={{ uri: item.imagem }} style={styles.image} />
-                  <Text style={styles.nome}>{item.nome}</Text>
-                </View>
-              )}
+              renderItem={renderItem}
             />
           )}
         </View>

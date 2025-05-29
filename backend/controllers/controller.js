@@ -1,4 +1,4 @@
-let musics = [
+let musicas = [
   {
     id: 1,
     title: 'Imagine',
@@ -6,7 +6,7 @@ let musics = [
     album: 'Imagine',
     year: 1971,
     genre: 'Rock',
-    url: 'https://example.com/imagine.mp3'
+    "image": "thymos.jpeg"
   },
   {
     id: 2,
@@ -15,19 +15,30 @@ let musics = [
     album: 'Thriller',
     year: 1982,
     genre: 'Pop',
-    url: 'https://example.com/billiejean.mp3'
+    "image": "splash-icon.png"
   }
 ];
 
 // Listar todas as músicas
 exports.getAllMusics = (req, res) => {
-  res.json(musics);
+  res.json(musicas);
 };
+
+exports.buscarMusicas = (req, res) => {
+  const nomeBusca = req.query.nome?.toLowerCase() || '';
+
+  const resultado = musicas.filter(musica => 
+    musica.title.toLowerCase().includes(nomeBusca)
+  );
+
+  res.json(resultado);
+};
+
 
 // Buscar música por ID
 exports.getMusicById = (req, res) => {
   const id = parseInt(req.params.id);
-  const music = musics.find(m => m.id === id);
+  const music = musicas.find(m => m.id === id);
   if (!music) {
     return res.status(404).json({ message: 'Música não encontrada' });
   }
@@ -41,31 +52,31 @@ exports.createMusic = (req, res) => {
     return res.status(400).json({ message: 'Título e artista são obrigatórios' });
   }
 
-  newMusic.id = musics.length ? musics[musics.length - 1].id + 1 : 1;
-  musics.push(newMusic);
+  newMusic.id = musicas.length ? musicas[musicas.length - 1].id + 1 : 1;
+  musicas.push(newMusic);
   res.status(201).json(newMusic);
 };
 
 // Atualizar música
 exports.updateMusic = (req, res) => {
   const id = parseInt(req.params.id);
-  const index = musics.findIndex(m => m.id === id);
+  const index = musicas.findIndex(m => m.id === id);
   if (index === -1) {
     return res.status(404).json({ message: 'Música não encontrada' });
   }
 
-  const updatedMusic = { ...musics[index], ...req.body, id };
-  musics[index] = updatedMusic;
+  const updatedMusic = { ...musicas[index], ...req.body, id };
+  musicas[index] = updatedMusic;
   res.json(updatedMusic);
 };
 
 // Deletar música
 exports.deleteMusic = (req, res) => {
   const id = parseInt(req.params.id);
-  const index = musics.findIndex(m => m.id === id);
+  const index = musicas.findIndex(m => m.id === id);
   if (index === -1) {
     return res.status(404).json({ message: 'Música não encontrada' });
   }
-  musics.splice(index, 1);
+  musicas.splice(index, 1);
   res.json({ message: 'Música deletada com sucesso' });
 };
