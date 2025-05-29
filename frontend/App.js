@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { 
-  View, 
-  Text, 
-  FlatList, 
-  Image, 
-  TouchableOpacity, 
-  StyleSheet,
-  TextInput,
-  ActivityIndicator,
-  Alert
+  View, Text, FlatList, Image, TouchableOpacity, 
+  StyleSheet, TextInput, ActivityIndicator, Alert 
 } from 'react-native';
 
-const API_URL = 'https://verbose-giggle-wrvjjqwvg7472g9g-3000.app.github.dev';
+const API_URL = 'http://localhost:5000/api/musicas'; // Troque pelo seu IP local ou localhost se for web
 
 export default function App() {
-  const [tela, setTela] = useState('Home'); 
+  const [tela, setTela] = useState('Home');
   const [musicas, setMusicas] = useState([]);
   const [favoritos, setFavoritos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,28 +16,28 @@ export default function App() {
 
   useEffect(() => {
     if (tela === 'Musicas') {
-      fetch(`${API_URL}/musicas`)
-        .then(response => response.json())
+      fetch(`${API_URL}`)
+        .then(res => res.json())
         .then(data => setMusicas(data))
-        .catch(error => console.error('Erro ao buscar músicas:', error));
+        .catch(err => console.error('Erro ao carregar músicas:', err));
     }
   }, [tela]);
 
-  const buscarMusicas = (term) => {
-    if (term.trim() === '') {
+  const buscarMusicas = (termo) => {
+    if (termo.trim() === '') {
       setSearchResults([]);
       return;
     }
 
     setLoading(true);
-    fetch(`${API_URL}/musicas?nome_like=${term}`)
-      .then(response => response.json())
+    fetch(`${API_URL}/buscar?nome=${termo}`)
+      .then(res => res.json())
       .then(data => {
         setSearchResults(data);
         setLoading(false);
       })
-      .catch(error => {
-        console.error('Erro na busca:', error);
+      .catch(err => {
+        console.error('Erro na busca:', err);
         setSearchResults([]);
         setLoading(false);
       });
@@ -62,14 +55,10 @@ export default function App() {
   };
 
   const limparFavoritos = () => {
-    Alert.alert(
-      'Confirmação',
-      'Deseja limpar todos os favoritos?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Sim', onPress: () => setFavoritos([]) },
-      ]
-    );
+    Alert.alert('Confirmação', 'Deseja limpar todos os favoritos?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sim', onPress: () => setFavoritos([]) },
+    ]);
   };
 
   const renderTela = () => {
@@ -83,8 +72,6 @@ export default function App() {
             placeholder="Pesquisar música..."
             value={searchTerm}
             onChangeText={onChangeSearch}
-            autoCorrect={false}
-            autoCapitalize="none"
           />
 
           {loading && <ActivityIndicator size="small" color="#D3E4B9" style={{ marginTop: 10 }} />}
@@ -96,7 +83,6 @@ export default function App() {
               <FlatList
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
-                style={{ marginTop: 10 }}
                 renderItem={({ item }) => (
                   <View style={styles.card}>
                     <Image source={{ uri: item.imagem }} style={styles.image} />
@@ -112,7 +98,6 @@ export default function App() {
               />
             )
           )}
-
         </View>
       );
     }
@@ -126,10 +111,7 @@ export default function App() {
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.card}>
-                <Image 
-                  source={{ uri: item.imagem }} 
-                  style={styles.image}
-                />
+                <Image source={{ uri: item.imagem }} style={styles.image} />
                 <Text style={styles.nome}>{item.nome}</Text>
                 <TouchableOpacity 
                   style={styles.btn}
@@ -156,10 +138,7 @@ export default function App() {
               keyExtractor={item => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.card}>
-                  <Image 
-                    source={{ uri: item.imagem }} 
-                    style={styles.image}
-                  />
+                  <Image source={{ uri: item.imagem }} style={styles.image} />
                   <Text style={styles.nome}>{item.nome}</Text>
                 </View>
               )}
@@ -173,9 +152,7 @@ export default function App() {
       return (
         <View style={styles.contentContainer}>
           <Text style={styles.title}>⚙️ Configurações</Text>
-          <Text style={styles.text}>
-            Aqui você pode gerenciar as configurações do app.
-          </Text>
+          <Text style={styles.text}>Aqui você pode limpar seus favoritos.</Text>
           <TouchableOpacity style={styles.btn} onPress={limparFavoritos}>
             <Text style={styles.btnText}>Limpar Favoritos</Text>
           </TouchableOpacity>
@@ -212,101 +189,90 @@ export default function App() {
 
 const styles = StyleSheet.create({
   header: {
-    height: 60,
     backgroundColor: '#D3E4B9',
-    justifyContent: 'center',
+    padding: 20,
     alignItems: 'center',
-    paddingTop: 15,
   },
   headerTitle: {
-    color: '#fff',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-  },
-  contentContainer: {
-    flex: 1,
-    paddingTop: 20,
-    paddingBottom: 80,
-    paddingHorizontal: 20,
-    backgroundColor: '#f2f2f2',
-  },
-  homeText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 15,
     color: '#333',
-  },
-  searchInput: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    fontSize: 16,
-    borderColor: '#D3E4B9',
-    borderWidth: 1,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-    color: '#333',
-  },
-  card: {
-    backgroundColor: '#fff',
-    marginBottom: 15,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    elevation: 3
-  },
-  image: {
-    width: 150,
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 10
-  },
-  nome: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8
-  },
-  btn: {
-    backgroundColor: '#D3E4B9',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    alignSelf: 'center',
-    marginTop: 15,
-  },
-  btnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   navbar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     backgroundColor: '#D3E4B9',
-    padding: 15,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    position: 'absolute',
-    bottom: 0,
-    width: '100%'
+    paddingVertical: 10,
   },
   navItem: {
-    color: '#fff',
+    fontSize: 16,
+    color: '#333',
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 22,
     fontWeight: 'bold',
-    fontSize: 16
+    marginBottom: 10,
+    color: '#333',
+  },
+  homeText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
   },
   text: {
+    fontSize: 16,
+    color: '#555',
     textAlign: 'center',
-    color: '#666',
     marginTop: 10,
-  }
+  },
+  card: {
+    backgroundColor: '#F0F4EF',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  nome: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  btn: {
+    backgroundColor: '#A3C9A8',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  btnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+  },
 });
-
-
-
-
