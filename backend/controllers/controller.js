@@ -1,21 +1,48 @@
 let musicas = [
   {
     id: 1,
-    title: 'Imagine',
-    artist: 'John Lennon',
-    album: 'Imagine',
-    year: 1971,
-    genre: 'Rock',
-    "image": "thymos.jpeg"
+    title: 'Dellarte',
+    artist: 'Bea Duarte',
+    album: 'Dellarte',
+    year: 2025,
+    genre: 'Pop',
+    "image": "Dellarte.jpg"
   },
   {
     id: 2,
-    title: 'Billie Jean',
-    artist: 'Michael Jackson',
-    album: 'Thriller',
-    year: 1982,
+    title: 'Pacto',
+    artist: 'Bea Duarte',
+    album: 'Dellarte',
+    year: 2025,
     genre: 'Pop',
-    "image": "splash-icon.png"
+    "image": "Pacto.jpg"
+  },
+  {
+    id: 3,
+    title: 'Máscaras',
+    artist: 'Bea Duarte',
+    album: 'Dellarte',
+    year: 2025,
+    genre: 'Pop',
+    "image": "Mascaras.jpeg"
+  },
+  {
+    id: 4,
+    title: 'Mensagem',
+    artist: 'Bea Duarte',
+    album: 'Dellarte',
+    year: 2025,
+    genre: 'Pop',
+    "Image": "Mensagem.webp"
+  },
+  {
+    id: 5,
+    title: 'Bruxa',
+    artist: 'Bea Duarte',
+    album: 'Dellarte',
+    year: 2025,
+    genre: 'Pop',
+    "imagem": "Bruxa.jpg"
   }
 ];
 

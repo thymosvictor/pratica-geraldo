@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, FlatList, Image, TouchableOpacity, 
-  StyleSheet, TextInput, ActivityIndicator, Alert 
+import {
+  View, Text, FlatList, Image, TouchableOpacity,
+  StyleSheet, TextInput, ActivityIndicator, ScrollView
 } from 'react-native';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
-import imagine from './assets/thymos.jpeg';
-import heyjude from './assets/splash-icon.png'
-import padrao from './assets/favicon.png'
+import Dellarte from './assets/Dellarte.jpg';
+import Pacto from './assets/Pacto.jpg';
+import Máscaras from './assets/Mascaras.jpeg';
+import Mensagem from './assets/Mensagem.webp';
+import Bruxa from './assets/Bruxa.jpg';
 
-// ⚠️ Troque localhost pelo IP da sua máquina se estiver no celular
 const API_URL = 'http://localhost:5000/api/musicas';
 
 export default function App() {
@@ -20,28 +22,27 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   const imageMap = {
-  'thymos.jpeg': imagine,
-  'splash-icon.png': heyjude,
-  'favicon.png': padrao,
-};
+    'Dellarte.jpg': Dellarte,
+    'Pacto.jpg': Pacto,
+    'Mascaras.jpeg': Máscaras,
+    'Mensagem.webp': Mensagem,
+    'Bruxa.jpg': Bruxa,
+  };
 
   useEffect(() => {
-    if (tela === 'Musicas') {
-      fetch(`${API_URL}`)
-        .then(res => res.json())
-        .then(data => setMusicas(data))
-        .catch(err => console.error('Erro ao carregar músicas:', err));
-    }
-  }, [tela]);
+    fetch(`${API_URL}`)
+      .then(res => res.json())
+      .then(data => setMusicas(data))
+      .catch(err => console.error('Erro ao carregar músicas:', err));
+  }, []);
 
-  const buscarMusicas = (termo) => {
-    if (termo.trim() === '') {
+  const buscarMusicas = () => {
+    if (searchTerm.trim() === '') {
       setSearchResults([]);
       return;
     }
-
     setLoading(true);
-    fetch(`${API_URL}/buscar?nome=${termo}`)
+    fetch(`${API_URL}/buscar?nome=${searchTerm}`)
       .then(res => res.json())
       .then(data => {
         setSearchResults(data);
@@ -54,79 +55,95 @@ export default function App() {
       });
   };
 
-  const onChangeSearch = (text) => {
-    setSearchTerm(text);
-    buscarMusicas(text);
-  };
-
   const adicionarFavorito = (musica) => {
     if (!favoritos.find(item => item.id === musica.id)) {
       setFavoritos([...favoritos, musica]);
     }
   };
 
-  const limparFavoritos = () => {
-    Alert.alert('Confirmação', 'Deseja limpar todos os favoritos?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sim', onPress: () => setFavoritos([]) },
-    ]);
+  const removerFavorito = (id) => {
+    setFavoritos(favoritos.filter(item => item.id !== id));
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }, isFavorito = false) => (
     <View style={styles.card}>
-      <Image 
-        source={imageMap[item.image] || padrao} 
-        style={styles.image} 
-      />
+      <Image source={imageMap[item.image] || Dellarte} style={styles.image} />
       <Text style={styles.nome}>{item.title}</Text>
       <Text>{item.artist}</Text>
-      <TouchableOpacity 
-        style={styles.btn}
-        onPress={() => adicionarFavorito(item)}
-      >
-        <Text style={styles.btnText}>⭐ Favoritar</Text>
-      </TouchableOpacity>
+      {isFavorito ? (
+        <TouchableOpacity
+          style={[styles.btn, { backgroundColor: '#cc0000' }]}
+          onPress={() => removerFavorito(item.id)}
+        >
+          <Text style={styles.btnText}>Remover</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.btn} onPress={() => adicionarFavorito(item)}>
+          <Text style={styles.btnText}>Favoritar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  const renderTrending = () => (
+    <View>
+      <Text style={styles.trendingTitle}>TOP TRENDING DA SEMANA</Text>
+      <FlatList
+        data={musicas.slice(0, 3)}
+        keyExtractor={item => item.id.toString()}
+        renderItem={(props) => renderItem(props)}
+      />
     </View>
   );
 
   const renderTela = () => {
     if (tela === 'Home') {
       return (
-        <View style={styles.contentContainer}>
-          <Text style={styles.homeText}>Bem-vindo ao app Trending Songs!</Text>
+        <ScrollView style={styles.contentContainer}>
+          {/* CAMPO DE BUSCA NO TOPO */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Pesquisar música..."
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+            />
+            {searchResults.length > 0 && (
+              <TouchableOpacity onPress={() => {
+                setSearchTerm('');
+                setSearchResults([]);
+              }}>
+                <Ionicons name="close-circle" size={24} color="#cc0000" style={styles.clearIcon} />
+              </TouchableOpacity>
+            )}
+          </View>
 
-          <TextInput 
-            style={styles.searchInput}
-            placeholder="Pesquisar música..."
-            value={searchTerm}
-            onChangeText={onChangeSearch}
-          />
+          <TouchableOpacity style={styles.searchButton} onPress={buscarMusicas}>
+            <Text style={styles.btnText}>Pesquisar</Text>
+          </TouchableOpacity>
 
-          {loading && <ActivityIndicator size="small" color="#D3E4B9" style={{ marginTop: 10 }} />}
+          {loading && <ActivityIndicator size="small" color="#A3C9A8" style={{ marginTop: 10 }} />}
 
-          {!loading && searchTerm !== '' && (
-            searchResults.length === 0 ? (
-              <Text style={styles.text}>Nenhuma música encontrada.</Text>
-            ) : (
-              <FlatList
-                data={searchResults}
-                keyExtractor={item => item.id.toString()}
-                renderItem={renderItem}
-              />
-            )
-          )}
-        </View>
+          {/* RESULTADOS DA BUSCA OU TRENDING */}
+          {searchResults.length > 0 ? (
+            <FlatList
+              data={searchResults}
+              keyExtractor={item => item.id.toString()}
+              renderItem={(props) => renderItem(props)}
+            />
+          ) : renderTrending()}
+        </ScrollView>
       );
     }
 
     if (tela === 'Musicas') {
       return (
         <View style={styles.contentContainer}>
-          <Text style={styles.title}>🎧 Lista de Músicas</Text>
+          <Text style={styles.title}>Lista de Músicas</Text>
           <FlatList
             data={musicas}
             keyExtractor={item => item.id.toString()}
-            renderItem={renderItem}
+            renderItem={(props) => renderItem(props)}
           />
         </View>
       );
@@ -135,28 +152,16 @@ export default function App() {
     if (tela === 'Favoritos') {
       return (
         <View style={styles.contentContainer}>
-          <Text style={styles.title}>⭐ Meus Favoritos</Text>
+          <Text style={styles.title}>Meus Favoritos</Text>
           {favoritos.length === 0 ? (
             <Text style={styles.text}>Nenhuma música favorita.</Text>
           ) : (
             <FlatList
               data={favoritos}
               keyExtractor={item => item.id.toString()}
-              renderItem={renderItem}
+              renderItem={(props) => renderItem(props, true)}
             />
           )}
-        </View>
-      );
-    }
-
-    if (tela === 'Configuração') {
-      return (
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>⚙️ Configurações</Text>
-          <Text style={styles.text}>Aqui você pode limpar seus favoritos.</Text>
-          <TouchableOpacity style={styles.btn} onPress={limparFavoritos}>
-            <Text style={styles.btnText}>Limpar Favoritos</Text>
-          </TouchableOpacity>
         </View>
       );
     }
@@ -172,16 +177,13 @@ export default function App() {
 
       <View style={styles.navbar}>
         <TouchableOpacity onPress={() => setTela('Home')}>
-          <Text style={styles.navItem}>🏠 Home</Text>
+          <Ionicons name="home" size={28} color={tela === 'Home' ? '#333' : '#aaa'} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setTela('Musicas')}>
-          <Text style={styles.navItem}>🎵 Músicas</Text>
+          <FontAwesome5 name="music" size={24} color={tela === 'Musicas' ? '#333' : '#aaa'} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setTela('Favoritos')}>
-          <Text style={styles.navItem}>⭐ Favoritos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTela('Configuração')}>
-          <Text style={styles.navItem}>⚙️ Configuração</Text>
+          <MaterialIcons name="favorite" size={28} color={tela === 'Favoritos' ? '#cc0000' : '#aaa'} />
         </TouchableOpacity>
       </View>
     </View>
@@ -190,38 +192,37 @@ export default function App() {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#D3E4B9',
+    backgroundColor: '#A3C9A8',
     padding: 20,
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
   },
   navbar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     backgroundColor: '#D3E4B9',
     paddingVertical: 10,
-  },
-  navItem: {
-    fontSize: 16,
-    color: '#333',
+    borderTopWidth: 1,
+    borderColor: '#ccc',
   },
   contentContainer: {
     flex: 1,
     padding: 10,
     backgroundColor: '#fff',
   },
+  trendingTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  homeText: {
-    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333',
@@ -240,9 +241,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
     shadowColor: '#000',
+    shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowRadius: 4,
     elevation: 2,
   },
   image: {
@@ -262,10 +263,18 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
+    marginTop: 5,
   },
   btnText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    width: '100%',
   },
   searchInput: {
     borderWidth: 1,
@@ -273,7 +282,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 8,
-    marginBottom: 10,
     backgroundColor: '#fff',
+    width: '20%',
+  },
+  searchButton: {
+    backgroundColor: '#87b08c',
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+    alignSelf: 'center',
+    width: '10%',
+  },
+  clearIcon: {
+    marginLeft: 8,
   },
 });
